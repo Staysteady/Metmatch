@@ -228,14 +228,14 @@ Professional financial platform aesthetic with:
 
 **Frontend Stack:**
 - React 18 with TypeScript in strict mode for type safety
-- Vite as build tool for fast development (port 3000)
+- Vite as build tool for fast development (port 5173)
 - Zustand for lightweight state management
 - Tailwind CSS with custom dark theme for consistent styling
 - Socket.io client for real-time WebSocket communication
 - React Router v6 for client-side routing with protected routes
 
 **Backend Stack:**
-- Node.js with Express.js API server (port 3001)
+- Node.js with Express.js API server (port 5001)
 - TypeScript with ESM modules for modern JavaScript
 - PostgreSQL (port 5434) as primary database
 - Redis (port 6380) for session management and caching
@@ -311,8 +311,8 @@ so that I can begin building the platform with a consistent development environm
 1. Monorepo structure created with packages/frontend, packages/backend, packages/shared
 2. TypeScript configuration with strict mode enabled across all packages
 3. Docker Compose configuration for PostgreSQL (port 5434) and Redis (port 6380)
-4. Vite configured for frontend development on port 3000
-5. Express server configured for backend on port 3001
+4. Vite configured for frontend development on port 5173
+5. Express server configured for backend on port 5001
 6. ESLint and Prettier configured with consistent rules
 7. Git repository initialized with proper .gitignore
 8. Package.json scripts for concurrent development (npm run dev starts all services)

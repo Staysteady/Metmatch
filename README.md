@@ -38,7 +38,7 @@ npm run dev
 ```
 
 This will start:
-- Backend API: http://localhost:3001
+- Backend API: http://localhost:5001
 - Frontend: http://localhost:5173
 
 ## Project Structure

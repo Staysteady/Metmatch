@@ -291,8 +291,8 @@ The vision is to evolve Met Match from a specialized LME trading platform into t
 
 ### Technology Preferences
 
-- **Frontend:** React 18 with TypeScript (strict mode), Vite for build tooling (port 3000), Zustand for state management, React Router v6 with protected routes, Tailwind CSS with custom dark theme, Socket.io client for WebSocket communications, Lucide React icons, React Hot Toast notifications
-- **Backend:** Node.js with Express.js (port 3001), TypeScript with ESM modules, Socket.io server for real-time events, JWT authentication with refresh tokens, bcrypt for password hashing (12 salt rounds), Helmet for security headers
+- **Frontend:** React 18 with TypeScript (strict mode), Vite for build tooling (port 5173), Zustand for state management, React Router v6 with protected routes, Tailwind CSS with custom dark theme, Socket.io client for WebSocket communications, Lucide React icons, React Hot Toast notifications
+- **Backend:** Node.js with Express.js (port 5001), TypeScript with ESM modules, Socket.io server for real-time events, JWT authentication with refresh tokens, bcrypt for password hashing (12 salt rounds), Helmet for security headers
 - **Database:** PostgreSQL (port 5434) for transactional data, Drizzle ORM for TypeScript-first data access, Redis (port 6380) for session management and caching, TimescaleDB extension for time-series data (future)
 - **Hosting/Infrastructure:** Docker Compose for development environment, Container-based deployment ready, Kubernetes-ready architecture, CloudFlare for CDN and DDoS protection (production)
 
