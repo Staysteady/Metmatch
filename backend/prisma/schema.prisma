@@ -1,0 +1,214 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  TRADER
+  TRADER_MM
+  BROKER
+  ADMIN
+}
+
+enum Direction {
+  BUY
+  SELL
+  BORROW
+  LEND
+}
+
+enum RFQStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  FILLED
+}
+
+enum OrderStatus {
+  DRAFT
+  SUBMITTED
+  WORKING
+  FILLED
+  CANCELLED
+}
+
+enum BroadcastType {
+  ALL
+  SELECTIVE
+}
+
+model User {
+  id                String              @id @default(uuid())
+  email             String              @unique
+  password          String
+  firstName         String
+  lastName          String
+  firmName          String
+  role              UserRole
+  isActive          Boolean             @default(true)
+  refreshTokens     RefreshToken[]
+  rfqsCreated       RFQ[]               @relation("RFQCreator")
+  rfqResponses      RFQResponse[]
+  orders            Order[]
+  broadcasts        MarketBroadcast[]
+  telemetryEvents   TelemetryEvent[]
+  performanceMetrics PerformanceMetric[]
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model RFQ {
+  id                  String        @id @default(uuid())
+  referenceNumber     String        @unique
+  creatorId           String
+  creator             User          @relation("RFQCreator", fields: [creatorId], references: [id])
+  product             String
+  direction           Direction
+  quantity            Float
+  tenor               String?
+  promptDate          DateTime?
+  expiresAt           DateTime
+  broadcastType       BroadcastType
+  recipientIds        String[]
+  specialInstructions String?
+  status              RFQStatus     @default(ACTIVE)
+  responses           RFQResponse[]
+  filledOrder         Order?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+}
+
+model RFQResponse {
+  id              String   @id @default(uuid())
+  rfqId           String
+  rfq             RFQ      @relation(fields: [rfqId], references: [id], onDelete: Cascade)
+  responderId     String
+  responder       User     @relation(fields: [responderId], references: [id])
+  price           Float
+  quantity        Float
+  validityMinutes Int
+  counterOffer    Boolean  @default(false)
+  isAccepted      Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  rfqId           String?     @unique
+  rfq             RFQ?        @relation(fields: [rfqId], references: [id])
+  traderId        String
+  trader          User        @relation(fields: [traderId], references: [id])
+  product         String
+  direction       Direction
+  quantity        Float
+  price           Float
+  tenor           String?
+  promptDate      DateTime?
+  status          OrderStatus @default(DRAFT)
+  executedAt      DateTime?
+  confirmationSent Boolean    @default(false)
+  trade           Trade?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model Trade {
+  id               String   @id @default(uuid())
+  orderId          String   @unique
+  order            Order    @relation(fields: [orderId], references: [id])
+  tradeReference   String   @unique
+  executionPrice   Float
+  executionQuantity Float
+  settlementDate   DateTime
+  confirmationSent Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model MarketBroadcast {
+  id             String    @id @default(uuid())
+  broadcasterId  String
+  broadcaster    User      @relation(fields: [broadcasterId], references: [id])
+  product        String
+  direction      Direction
+  quantity       Float
+  price          Float
+  tenor          String?
+  promptDate     DateTime?
+  expiresAt      DateTime
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  userId      String?
+  action      String
+  entityType  String
+  entityId    String?
+  metadata    Json?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+  
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+model TelemetryEvent {
+  id          String   @id @default(uuid())
+  userId      String?
+  sessionId   String
+  eventType   String
+  eventName   String
+  path        String?
+  method      String?
+  statusCode  Int?
+  duration    Int?
+  metadata    Json?
+  userAgent   String?
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+  
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([sessionId])
+  @@index([eventType])
+  @@index([createdAt])
+}
+
+model PerformanceMetric {
+  id          String   @id @default(uuid())
+  metricType  String
+  metricName  String
+  value       Float
+  unit        String
+  path        String?
+  sessionId   String?
+  userId      String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([metricType])
+  @@index([userId])
+  @@index([createdAt])
+}

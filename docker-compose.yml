@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: metmatch-db
+    environment:
+      POSTGRES_USER: metmatch
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: metmatch
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - metmatch-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: metmatch-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - metmatch-network
+
+volumes:
+  postgres_data:
+
+networks:
+  metmatch-network:
+    driver: bridge
