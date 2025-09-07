@@ -1,7 +1,10 @@
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../services/api';
+import { useAuthStore } from '../store/authStore';
 
 export default function Orders() {
+  const { user } = useAuthStore();
   const { data, isLoading } = useQuery({
     queryKey: ['orders'],
     queryFn: async () => {
@@ -19,6 +22,16 @@ export default function Orders() {
             View and manage your orders
           </p>
         </div>
+        {user?.role !== 'BROKER' && (
+          <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+            <Link
+              to="/orders/create"
+              className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto"
+            >
+              Create Order
+            </Link>
+          </div>
+        )}
       </div>
       
       <div className="mt-8 flex flex-col">
@@ -59,9 +72,11 @@ export default function Orders() {
                     </tr>
                   ) : (
                     data?.orders?.map((order: any) => (
-                      <tr key={order.id}>
+                      <tr key={order.id} className="hover:bg-gray-50">
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
-                          {order.product}
+                          <Link to={`/orders/${order.id}`} className="text-blue-600 hover:text-blue-900">
+                            {order.product}
+                          </Link>
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
                           {order.direction}
@@ -70,12 +85,13 @@ export default function Orders() {
                           {order.quantity}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
-                          {order.price}
+                          ${order.price}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm">
                           <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
                             order.status === 'FILLED' ? 'bg-green-100 text-green-800' :
                             order.status === 'WORKING' ? 'bg-yellow-100 text-yellow-800' :
+                            order.status === 'SUBMITTED' ? 'bg-blue-100 text-blue-800' :
                             order.status === 'CANCELLED' ? 'bg-red-100 text-red-800' :
                             'bg-gray-100 text-gray-800'
                           }`}>
@@ -84,6 +100,13 @@ export default function Orders() {
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
                           {new Date(order.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {order.rfq && (
+                            <Link to={`/rfqs/${order.rfq.id}`} className="text-blue-600 hover:text-blue-900">
+                              RFQ: {order.rfq.referenceNumber}
+                            </Link>
+                          )}
                         </td>
                       </tr>
                     ))

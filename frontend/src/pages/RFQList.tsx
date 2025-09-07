@@ -84,9 +84,11 @@ export default function RFQList() {
                     </tr>
                   ) : (
                     data?.rfqs?.map((rfq: any) => (
-                      <tr key={rfq.id}>
+                      <tr key={rfq.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => window.location.href = `/rfqs/${rfq.id}`}>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
-                          {rfq.referenceNumber}
+                          <Link to={`/rfqs/${rfq.id}`} className="text-blue-600 hover:text-blue-900">
+                            {rfq.referenceNumber}
+                          </Link>
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
                           {rfq.product}
@@ -101,6 +103,8 @@ export default function RFQList() {
                           <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
                             rfq.status === 'ACTIVE' ? 'bg-green-100 text-green-800' :
                             rfq.status === 'FILLED' ? 'bg-blue-100 text-blue-800' :
+                            rfq.status === 'EXPIRED' ? 'bg-yellow-100 text-yellow-800' :
+                            rfq.status === 'CANCELLED' ? 'bg-red-100 text-red-800' :
                             'bg-gray-100 text-gray-800'
                           }`}>
                             {rfq.status}
@@ -108,6 +112,9 @@ export default function RFQList() {
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
                           {rfq.creator?.firmName}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {rfq.responses?.length || 0} responses
                         </td>
                       </tr>
                     ))
