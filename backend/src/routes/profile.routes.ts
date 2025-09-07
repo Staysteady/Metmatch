@@ -24,4 +24,10 @@ router.put('/trading-capabilities', profileController.updateTradingCapabilities)
 // GDPR compliance
 router.get('/export', profileController.exportUserData);
 
+// Epic 5: Extended profile features
+router.get('/extended/:userId?', profileController.getExtendedProfile);
+router.put('/extended', profileController.updateExtendedProfile);
+router.put('/status', profileController.updateUserStatus);
+router.get('/search', profileController.searchProfiles);
+
 export default router;

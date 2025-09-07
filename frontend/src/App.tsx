@@ -12,6 +12,9 @@ import CreateRFQ from './pages/CreateRFQ';
 import Orders from './pages/Orders';
 import MarketBroadcast from './pages/MarketBroadcast';
 import Profile from './pages/Profile';
+import ExtendedProfile from './pages/ExtendedProfile';
+import NetworkVisualization from './pages/NetworkVisualization';
+import CounterpartyDiscovery from './pages/CounterpartyDiscovery';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import TelemetryDashboard from './pages/admin/TelemetryDashboard';
 
@@ -37,6 +40,10 @@ function App() {
         <Route path="/orders" element={<Orders />} />
         <Route path="/market" element={<MarketBroadcast />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/profile/:userId" element={<ExtendedProfile />} />
+        <Route path="/extended-profile" element={<ExtendedProfile />} />
+        <Route path="/network" element={<NetworkVisualization />} />
+        <Route path="/discover" element={<CounterpartyDiscovery />} />
         <Route path="/admin" element={isAdmin ? <AdminDashboard /> : <Navigate to="/dashboard" />} />
         <Route path="/admin/telemetry" element={isAdmin ? <TelemetryDashboard /> : <Navigate to="/dashboard" />} />
         <Route path="/" element={<Navigate to="/dashboard" />} />

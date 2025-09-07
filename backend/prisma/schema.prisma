@@ -57,6 +57,9 @@ model User {
   broadcasts        MarketBroadcast[]
   telemetryEvents   TelemetryEvent[]
   performanceMetrics PerformanceMetric[]
+  profile           UserProfile?
+  connectionsInitiated Connection[]     @relation("ConnectionRequester")
+  connectionsReceived  Connection[]     @relation("ConnectionTarget")
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
 }
@@ -211,4 +214,76 @@ model PerformanceMetric {
   @@index([metricType])
   @@index([userId])
   @@index([createdAt])
+}
+
+enum UserStatus {
+  ACTIVE
+  AWAY
+  BUSY
+  OFFLINE
+}
+
+enum ConnectionStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum DueDiligenceStatus {
+  NOT_STARTED
+  PENDING
+  VERIFIED
+}
+
+model UserProfile {
+  id                String     @id @default(uuid())
+  userId            String     @unique
+  user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  biography         String?
+  productsTraded    String[]
+  marketsCovered    String[]
+  contactEmail      String?
+  contactPhone      String?
+  preferredContact  String?
+  status            UserStatus @default(OFFLINE)
+  statusMessage     String?
+  lastActiveAt      DateTime   @default(now())
+  viewCount         Int        @default(0)
+  profileComplete   Int        @default(0) // Percentage 0-100
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  
+  @@index([userId])
+  @@index([status])
+}
+
+model Connection {
+  id                 String              @id @default(uuid())
+  requesterId        String
+  requester          User                @relation("ConnectionRequester", fields: [requesterId], references: [id])
+  targetId           String
+  target             User                @relation("ConnectionTarget", fields: [targetId], references: [id])
+  status             ConnectionStatus    @default(PENDING)
+  dueDiligenceStatus DueDiligenceStatus @default(NOT_STARTED)
+  message            String?
+  acceptedAt         DateTime?
+  rejectedAt         DateTime?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  
+  @@unique([requesterId, targetId])
+  @@index([requesterId])
+  @@index([targetId])
+  @@index([status])
+}
+
+model BookmarkedCounterparty {
+  id            String   @id @default(uuid())
+  userId        String
+  counterpartyId String
+  notes         String?
+  createdAt     DateTime @default(now())
+  
+  @@unique([userId, counterpartyId])
+  @@index([userId])
 }
