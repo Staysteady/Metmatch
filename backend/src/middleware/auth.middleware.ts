@@ -5,6 +5,7 @@ import { AppError } from './error.middleware';
 export interface AuthRequest extends Request {
   userId?: string;
   userRole?: string;
+  sessionId?: string;
 }
 
 export const authenticate = async (

@@ -11,9 +11,11 @@ import rfqRoutes from './routes/rfq.routes';
 import orderRoutes from './routes/order.routes';
 import marketRoutes from './routes/market.routes';
 import telemetryRoutes from './routes/telemetry.routes';
+import activityRoutes from './routes/activity.routes';
 import { errorHandler } from './middleware/error.middleware';
 import { sessionMiddleware, telemetryMiddleware, trackWebSocketEvent } from './middleware/telemetry.middleware';
 import { logger } from './utils/logger';
+import { websocketService } from './services/websocket.service';
 
 dotenv.config();
 
@@ -44,37 +46,18 @@ app.use('/api/rfqs', rfqRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/markets', marketRoutes);
 app.use('/api/telemetry', telemetryRoutes);
+app.use('/api/activities', activityRoutes);
 
 app.use(errorHandler);
 
-io.on('connection', (socket) => {
-  logger.info(`Client connected: ${socket.id}`);
-  
-  // Track WebSocket connection
-  trackWebSocketEvent('connection', undefined, socket.id, {
-    transport: socket.conn.transport.name
-  });
-  
-  socket.on('join-room', (room: string) => {
-    socket.join(room);
-    logger.info(`Socket ${socket.id} joined room ${room}`);
-    
-    // Track room join event
-    trackWebSocketEvent('join-room', undefined, socket.id, { room });
-  });
-  
-  socket.on('disconnect', () => {
-    logger.info(`Client disconnected: ${socket.id}`);
-    
-    // Track disconnection
-    trackWebSocketEvent('disconnect', undefined, socket.id);
-  });
-});
+// Initialize WebSocket service
+websocketService.initialize(io);
+
+// Export io for use in other modules
+export { io };
 
 const PORT = process.env.PORT || 5001;
 
 httpServer.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`);
 });
-
-export { io };
