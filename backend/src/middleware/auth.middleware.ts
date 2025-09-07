@@ -6,6 +6,11 @@ export interface AuthRequest extends Request {
   userId?: string;
   userRole?: string;
   sessionId?: string;
+  user?: {
+    id: string;
+    role: string;
+    email?: string;
+  };
 }
 
 export const authenticate = async (
@@ -25,6 +30,11 @@ export const authenticate = async (
     
     req.userId = decoded.userId;
     req.userRole = decoded.role;
+    req.user = {
+      id: decoded.userId,
+      role: decoded.role,
+      email: decoded.email,
+    };
     
     next();
   } catch (error) {

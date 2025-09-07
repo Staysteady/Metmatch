@@ -14,6 +14,8 @@ import MarketBroadcast from './pages/MarketBroadcast';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import TelemetryDashboard from './pages/admin/TelemetryDashboard';
+import AuditTrailBrowser from './pages/AuditTrailBrowser';
+import ComplianceReports from './pages/ComplianceReports';
 
 function App() {
   const { isAuthenticated, user } = useAuthStore();
@@ -39,6 +41,8 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/admin" element={isAdmin ? <AdminDashboard /> : <Navigate to="/dashboard" />} />
         <Route path="/admin/telemetry" element={isAdmin ? <TelemetryDashboard /> : <Navigate to="/dashboard" />} />
+        <Route path="/audit" element={(isAdmin || user?.role === 'BROKER') ? <AuditTrailBrowser /> : <Navigate to="/dashboard" />} />
+        <Route path="/compliance" element={(isAdmin || user?.role === 'BROKER') ? <ComplianceReports /> : <Navigate to="/dashboard" />} />
         <Route path="/" element={<Navigate to="/dashboard" />} />
       </Route>
     </Routes>
