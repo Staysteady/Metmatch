@@ -6,6 +6,7 @@ import Layout from './components/Layout';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import TradingDashboard from './pages/TradingDashboard';
 import RFQList from './pages/RFQList';
 import CreateRFQ from './pages/CreateRFQ';
 import Orders from './pages/Orders';
@@ -30,6 +31,7 @@ function App() {
       
       <Route element={isAuthenticated ? <Layout /> : <Navigate to="/login" />}>
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/trading" element={<TradingDashboard />} />
         <Route path="/rfqs" element={<RFQList />} />
         <Route path="/rfqs/create" element={<CreateRFQ />} />
         <Route path="/orders" element={<Orders />} />
