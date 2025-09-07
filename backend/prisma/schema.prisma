@@ -57,6 +57,7 @@ model User {
   broadcasts        MarketBroadcast[]
   telemetryEvents   TelemetryEvent[]
   performanceMetrics PerformanceMetric[]
+  auditLogs         AuditLog[]
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
 }
@@ -158,17 +159,20 @@ model MarketBroadcast {
 model AuditLog {
   id          String   @id @default(uuid())
   userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   action      String
   entityType  String
   entityId    String?
   metadata    Json?
   ipAddress   String?
   userAgent   String?
+  checksum    String?  // Cryptographic hash for integrity verification
   createdAt   DateTime @default(now())
   
   @@index([userId])
   @@index([entityType, entityId])
   @@index([createdAt])
+  @@index([action])
 }
 
 model TelemetryEvent {
