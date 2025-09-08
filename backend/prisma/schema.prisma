@@ -22,6 +22,7 @@ enum Direction {
 }
 
 enum RFQStatus {
+  DRAFT
   ACTIVE
   EXPIRED
   CANCELLED

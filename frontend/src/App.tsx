@@ -9,7 +9,10 @@ import Dashboard from './pages/Dashboard';
 import TradingDashboard from './pages/TradingDashboard';
 import RFQList from './pages/RFQList';
 import CreateRFQ from './pages/CreateRFQ';
+import RFQDetail from './pages/RFQDetail';
 import Orders from './pages/Orders';
+import CreateOrder from './pages/CreateOrder';
+import OrderDetail from './pages/OrderDetail';
 import MarketBroadcast from './pages/MarketBroadcast';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -34,7 +37,10 @@ function App() {
         <Route path="/trading" element={<TradingDashboard />} />
         <Route path="/rfqs" element={<RFQList />} />
         <Route path="/rfqs/create" element={<CreateRFQ />} />
+        <Route path="/rfqs/:id" element={<RFQDetail />} />
         <Route path="/orders" element={<Orders />} />
+        <Route path="/orders/create" element={<CreateOrder />} />
+        <Route path="/orders/:id" element={<OrderDetail />} />
         <Route path="/market" element={<MarketBroadcast />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/admin" element={isAdmin ? <AdminDashboard /> : <Navigate to="/dashboard" />} />
