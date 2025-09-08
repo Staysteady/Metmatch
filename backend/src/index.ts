@@ -12,6 +12,7 @@ import orderRoutes from './routes/order.routes';
 import marketRoutes from './routes/market.routes';
 import telemetryRoutes from './routes/telemetry.routes';
 import activityRoutes from './routes/activity.routes';
+import networkRoutes from './routes/network.routes';
 import { errorHandler } from './middleware/error.middleware';
 import { sessionMiddleware, telemetryMiddleware, trackWebSocketEvent } from './middleware/telemetry.middleware';
 import { logger } from './utils/logger';
@@ -47,6 +48,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/markets', marketRoutes);
 app.use('/api/telemetry', telemetryRoutes);
 app.use('/api/activities', activityRoutes);
+app.use('/api/network', networkRoutes);
 
 app.use(errorHandler);
 

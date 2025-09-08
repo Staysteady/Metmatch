@@ -358,3 +358,202 @@ export const updateTradingCapabilities = async (req: AuthRequest, res: Response,
     next(error);
   }
 };
+
+// Epic 5: Network Intelligence & Discovery - Story 5.1 Endpoints
+
+export const getExtendedProfile = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.params.userId || req.userId;
+    
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        profile: true
+      }
+    });
+    
+    if (!user) {
+      throw new AppError('User not found', 404);
+    }
+    
+    // Increment view count if viewing another user's profile
+    if (userId !== req.userId && user.profile) {
+      await prisma.userProfile.update({
+        where: { id: user.profile.id },
+        data: { viewCount: { increment: 1 } }
+      });
+    }
+    
+    res.json({
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      firmName: user.firmName,
+      role: user.role,
+      profile: user.profile || {
+        biography: null,
+        productsTraded: [],
+        marketsCovered: [],
+        contactEmail: null,
+        contactPhone: null,
+        preferredContact: null,
+        status: 'OFFLINE',
+        statusMessage: null,
+        lastActiveAt: user.updatedAt,
+        viewCount: 0,
+        profileComplete: 0
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateExtendedProfile = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const {
+      biography,
+      productsTraded,
+      marketsCovered,
+      contactEmail,
+      contactPhone,
+      preferredContact
+    } = req.body;
+    
+    // Calculate profile completeness
+    let completeness = 0;
+    const fields = [biography, productsTraded?.length, marketsCovered?.length, contactEmail, contactPhone, preferredContact];
+    fields.forEach(field => {
+      if (field) completeness += 100 / fields.length;
+    });
+    
+    const profile = await prisma.userProfile.upsert({
+      where: { userId: req.userId },
+      create: {
+        userId: req.userId,
+        biography,
+        productsTraded: productsTraded || [],
+        marketsCovered: marketsCovered || [],
+        contactEmail,
+        contactPhone,
+        preferredContact,
+        profileComplete: Math.round(completeness)
+      },
+      update: {
+        biography,
+        productsTraded: productsTraded || [],
+        marketsCovered: marketsCovered || [],
+        contactEmail,
+        contactPhone,
+        preferredContact,
+        profileComplete: Math.round(completeness)
+      }
+    });
+    
+    await AuditService.log({
+      userId: req.userId,
+      action: AuditAction.PROFILE_UPDATE,
+      entityType: EntityType.USER,
+      entityId: req.userId,
+      metadata: { profileId: profile.id },
+      request: req
+    });
+    
+    res.json({
+      message: 'Profile updated successfully',
+      profile
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateUserStatus = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { status, statusMessage } = req.body;
+    
+    if (!['ACTIVE', 'AWAY', 'BUSY', 'OFFLINE'].includes(status)) {
+      throw new AppError('Invalid status', 400);
+    }
+    
+    const profile = await prisma.userProfile.upsert({
+      where: { userId: req.userId },
+      create: {
+        userId: req.userId,
+        status,
+        statusMessage,
+        lastActiveAt: new Date()
+      },
+      update: {
+        status,
+        statusMessage,
+        lastActiveAt: status === 'ACTIVE' ? new Date() : undefined
+      }
+    });
+    
+    // Broadcast status change via WebSocket (to be implemented)
+    // WebSocketService.broadcastUserStatus(req.userId, status, statusMessage);
+    
+    res.json({
+      message: 'Status updated successfully',
+      status: profile.status,
+      statusMessage: profile.statusMessage
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const searchProfiles = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { product, market, firm, role } = req.query;
+    
+    const where: any = {};
+    
+    if (role) {
+      where.role = role as string;
+    }
+    
+    if (firm) {
+      where.firmName = {
+        contains: firm as string,
+        mode: 'insensitive'
+      };
+    }
+    
+    const users = await prisma.user.findMany({
+      where,
+      include: {
+        profile: {
+          where: {
+            AND: [
+              product ? {
+                productsTraded: {
+                  has: product as string
+                }
+              } : {},
+              market ? {
+                marketsCovered: {
+                  has: market as string
+                }
+              } : {}
+            ]
+          }
+        }
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        firmName: true,
+        role: true,
+        profile: true
+      }
+    });
+    
+    res.json(users);
+  } catch (error) {
+    next(error);
+  }
+};
